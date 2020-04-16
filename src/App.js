@@ -1,26 +1,44 @@
-import React from 'react';
-import logo from './logo.svg';
-import './App.css';
+import React, { Component } from "react";
 
-function App() {
-  return (
-    <div className="App">
-      <header className="App-header">
-        <img src={logo} className="App-logo" alt="logo" />
-        <p>
-          Edit <code>src/App.js</code> and save to reload.
-        </p>
-        <a
-          className="App-link"
-          href="https://reactjs.org"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          Learn React
-        </a>
-      </header>
-    </div>
-  );
+import { bindActionCreators } from "redux";
+import { connect } from "react-redux";
+
+import { Creators as TodoActions } from "./store/ducks/todos";
+
+class TodoList extends Component {
+  handleSubmit = (e) => {
+    e.preventDefault();
+    this.props.addTodo(this.input.value);
+    this.input.value = "";
+  };
+  render() {
+    const { todos, toggleTodo, removeTodo } = this.props;
+    return (
+      <section>
+        <form onSubmit={this.handleSubmit}>
+          <input ref={(el) => (this.input = el)} />
+          <button type="submit">Novo</button>
+        </form>
+        <ul>
+          {todos.map((todo) => (
+            <li key={todo.id}>
+              {todo.complete ? <s>{todo.text}</s> : todo.text}
+              <div>
+                <button onClick={() => toggleTodo(todo.id)}>Toggle</button>
+                <button onClick={() => removeTodo(todo.id)}>Remove</button>
+              </div>
+            </li>
+          ))}
+        </ul>
+      </section>
+    );
+  }
 }
 
-export default App;
+const mapStateToProps = (state) => ({
+  todos: state.todos,
+});
+
+const mapDispatchToProps = (dispatch) => bindActionCreators(TodoActions, dispatch);
+
+export default connect(mapStateToProps, mapDispatchToProps)(TodoList);
